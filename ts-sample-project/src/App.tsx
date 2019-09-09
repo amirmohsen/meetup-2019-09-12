@@ -1,8 +1,11 @@
 import React, { ReactElement, useState, useCallback } from 'react';
+import styled from 'styled-components';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import ResultCard from './ResultCard';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -22,12 +25,24 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
+const SwitchWrapper = styled.span`
+  margin-left: 30px;
+`;
+
 const App = (props): ReactElement => {
   const { Fib } = props;
+  const [isSurpriseRevealed, enableSurprise] = useState(false);
   const [index, setIndex] = useState('');
   const [jsResult, setJSResult] = useState();
   const [jsNativeResult, setJSNativeResult] = useState();
   const [rustResult, setRustResult] = useState();
+
+  const setSurpriseState = useCallback(
+    event => {
+      enableSurprise(event.target.checked);
+    },
+    [enableSurprise]
+  );
 
   const refreshJSResult = useCallback(async () => {
     const indexAsNumber = Number.parseInt(index);
@@ -89,6 +104,18 @@ const App = (props): ReactElement => {
         >
           Generate
         </Button>
+        <SwitchWrapper>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isSurpriseRevealed}
+                onChange={setSurpriseState}
+                value="surprise"
+              />
+            }
+            label="A little surprise"
+          />
+        </SwitchWrapper>
         <div className={classes.root}>
           <Grid container spacing={3}>
             <Grid item xs={4}>
@@ -99,14 +126,16 @@ const App = (props): ReactElement => {
                 {...jsResult}
               />
             </Grid>
-            <Grid item xs={4}>
-              <ResultCard
-                avatar="NJS"
-                header="Native JS Result"
-                onRefresh={refreshJSNativeResult}
-                {...jsNativeResult}
-              />
-            </Grid>
+            {isSurpriseRevealed && (
+              <Grid item xs={4}>
+                <ResultCard
+                  avatar="NJS"
+                  header="Native JS Result"
+                  onRefresh={refreshJSNativeResult}
+                  {...jsNativeResult}
+                />
+              </Grid>
+            )}
             <Grid item xs={4}>
               <ResultCard
                 avatar="R"

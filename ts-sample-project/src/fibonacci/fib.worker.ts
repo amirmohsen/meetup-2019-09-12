@@ -1,17 +1,17 @@
 import registerPromiseWorker from 'promise-worker/register';
 import jsFib from 'fibonacci-fast';
-import { MESSAGE_TYPES } from './types';
+import { MESSAGE_TYPES, FIB_TYPES } from './types';
 
 const ctx: Worker = self as any;
 
 let rustFib;
 
 const fib = {
-  js: ({ index }) => {
+  [FIB_TYPES.JS]: ({ index }) => {
     const { number } = jsFib.get(index);
     return number.toString();
   },
-  jsNative: ({ index }) => {
+  [FIB_TYPES.JS_NATIVE]: ({ index }) => {
     let f0 = 0n;
     let f1 = 1n;
     for (let i = 0; i < index; i += 1) {
@@ -21,7 +21,7 @@ const fib = {
     }
     return f0.toString();
   },
-  rust: ({ index }) => {
+  [FIB_TYPES.RUST]: ({ index }) => {
     return rustFib(index);
   }
 };
@@ -39,7 +39,14 @@ const actions = {
       throw new Error(`No fib function exists for type "${type}"`);
     }
 
-    return fibFunc({ index });
+    const start = Date.now();
+    const number = fibFunc({ index });
+    const duration = Date.now() - start;
+
+    return {
+      number,
+      duration
+    };
   }
 };
 

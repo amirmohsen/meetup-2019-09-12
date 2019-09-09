@@ -1,29 +1,34 @@
 import PromiseWorker from 'promise-worker';
+import { MESSAGE_TYPES, FIB_TYPES } from './types';
 
 export default new (class Fib {
-  private worker: PromiseWorker;
+  private loaded: boolean = false;
+  private jsWorker: PromiseWorker;
+  private jsNativeWorker: PromiseWorker;
+  private rustWorker: PromiseWorker;
 
   async load() {
-    if (this.worker) {
+    if (this.loaded) {
       return;
     }
 
-    this.worker = new PromiseWorker(new Worker('./worker.js'));
-    await this.worker.postMessage({ type: 'load' });
+    this.jsWorker = new PromiseWorker(new Worker('./worker.js'));
+    this.jsNativeWorker = new PromiseWorker(new Worker('./worker.js'));
+    this.rustWorker = new PromiseWorker(new Worker('./worker.js'));
+    this.rustWorker.postMessage({
+      type: MESSAGE_TYPES.LOAD
+    });
+    this.loaded = true;
   }
 
   async js(index) {
-    const start = Date.now();
-
-    const number = await this.worker.postMessage({
-      type: 'fib',
+    const { number, duration } = await this.jsWorker.postMessage({
+      type: MESSAGE_TYPES.FIB,
       payload: {
-        type: 'js',
+        type: FIB_TYPES.JS,
         index
       }
     });
-
-    const duration = Date.now() - start;
 
     return {
       duration,
@@ -33,17 +38,13 @@ export default new (class Fib {
   }
 
   async jsNative(index) {
-    const start = Date.now();
-
-    const number = await this.worker.postMessage({
-      type: 'fib',
+    const { number, duration } = await this.jsNativeWorker.postMessage({
+      type: MESSAGE_TYPES.FIB,
       payload: {
-        type: 'jsNative',
+        type: FIB_TYPES.JS_NATIVE,
         index
       }
     });
-
-    const duration = Date.now() - start;
 
     return {
       duration,
@@ -53,17 +54,13 @@ export default new (class Fib {
   }
 
   async rust(index) {
-    const start = Date.now();
-
-    const number = await this.worker.postMessage({
-      type: 'fib',
+    const { number, duration } = await this.rustWorker.postMessage({
+      type: MESSAGE_TYPES.FIB,
       payload: {
-        type: 'rust',
+        type: FIB_TYPES.RUST,
         index
       }
     });
-
-    const duration = Date.now() - start;
 
     return {
       duration,

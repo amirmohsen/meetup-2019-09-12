@@ -3,7 +3,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const baseConfig = {
   mode: 'development',
-  entry: './src/index.ts',
   module: {
     rules: [
       {
@@ -23,7 +22,10 @@ const baseConfig = {
               ],
               '@babel/preset-react'
             ],
-            plugins: ['@babel/plugin-syntax-bigint']
+            plugins: [
+              '@babel/plugin-syntax-bigint',
+              '@babel/plugin-proposal-class-properties'
+            ]
           }
         },
         exclude: /node_modules/
@@ -32,10 +34,6 @@ const baseConfig = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
-  },
-  output: {
-    filename: 'app.js',
-    path: path.resolve(__dirname, 'dist')
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -45,44 +43,23 @@ const baseConfig = {
   devtool: 'source-map'
 };
 
+const appConfig = {
+  ...baseConfig,
+  entry: './src/index.ts',
+  output: {
+    filename: 'app.js',
+    path: path.resolve(__dirname, 'dist')
+  }
+};
+
 const workerConfig = {
-  mode: 'development',
+  ...baseConfig,
   entry: './src/fibonacci/fib.worker.ts',
   target: 'webworker',
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-typescript',
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    chrome: '76'
-                  }
-                }
-              ],
-              '@babel/preset-react'
-            ],
-            plugins: ['@babel/plugin-syntax-bigint']
-          }
-        },
-        exclude: /node_modules/
-      }
-    ]
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js']
-  },
   output: {
     filename: 'worker.js',
     path: path.resolve(__dirname, 'dist')
-  },
-  devtool: 'source-map'
+  }
 };
 
-module.exports = [baseConfig, workerConfig];
+module.exports = [appConfig, workerConfig];
