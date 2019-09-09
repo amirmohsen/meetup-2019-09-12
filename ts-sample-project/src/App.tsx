@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
 import ResultCard from './ResultCard';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -87,6 +88,9 @@ const App = (props): ReactElement => {
 
   return (
     <main>
+      <Typography variant="h6" gutterBottom>
+        Repo: https://github.com/amirmohsen/meetup-2019-09-12
+      </Typography>
       <form onSubmit={onSubmit}>
         <TextField
           label="Index"
